@@ -1,0 +1,44 @@
+1.
+MATCH (a)-[r:ACTED_IN]->(b)<-[q:DIRECTED]-(c)
+WHERE a.name = c.name
+RETURN a.name, b.title
+
+2.
+MATCH (p:Person )-[:ACTED_IN]->(:Movie)
+WITH collect(distinct p) as actors 
+MATCH (d:Person)-[:DIRECTED]->(:Movie)
+WHERE NOT d IN actors
+RETURN distinct d.name
+
+3.
+MATCH (a:Person)-[:ACTED_IN]->(:Movie)
+SET a:Actor
+RETURN a;
+
+4.
+MATCH (n:Person)-[r:ACTED_IN]->()
+WITH n,SUM(SIZE(r.roles)) as roleCount
+SET n.roleCount = roleCount
+RETURN *
+
+5.
+MATCH (d:Person)-[:DIRECTED]->(:Movie)<-[r:ACTED_IN]-(a:Actor)
+WITH d,SUM(SIZE(r.roles)) AS  roleCount
+RETURN d.name AS director_name, roleCount
+ORDER BY roleCount desc
+
+6.
+MATCH (d:Person)-[:DIRECTED]->(:Movie)
+WHERE d.born >= 1966 
+WITH COLLECT(DISTINCT d) AS dirs
+MATCH (a:Actor)-[:ACTED_IN]->(:Movie)<-[:DIRECTED]-(d:Person)
+WHERE d in dirs
+WITH   COUNT(DISTINCT d) AS distinct_dir, a, dirs
+WHERE distinct_dir = SIZE(dirs)
+RETURN a.name
+
+7.
+MATCH (a)-[original:ACTED_IN]->(b)
+CREATE (a)-[new:APPEARED_IN]->(b)
+SET new = original
+DELETE original
