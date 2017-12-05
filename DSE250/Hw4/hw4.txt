@@ -1,0 +1,30 @@
+1. (10 pts) Find the names of all persons in the graph.
+
+g.V().hasLabel('person').values('name')
+
+2. (10 pts) Find the age property of a person node whose name is ’marko’.
+
+g.V().hasLabel('person').has('name','marko').values('age')
+
+3. (15 pts) Find the names of the persons marko has worked with (has co-created something with).
+
+g.V().has('name','marko').as('exclude').out('created').in('created').where(neq('exclude')).values('name')
+
+4. (15 pts) Find the maximum age of persons in the graph.
+
+g.V().hasLabel('person').values('age').max()
+
+5. (15 pts) For each software artifact, count its creators
+
+g.V().hasLabel('software').group().by('name').by(inE('created').count())
+
+6. (15 pts) For each person, compute the weighted sum of their creations
+(sum up the weight attributes on the created edges emanating from
+this person).
+
+g.V().hasLabel('person').group().by('name').by(outE('created').values('weight').sum())
+
+7. (20 pts) Find creative and sociable persons (i.e. persons who have
+both created something and know someone).
+
+g.V().hasLabel('person').outE('created').outV().outE('knows').outV().values('name').dedup()
